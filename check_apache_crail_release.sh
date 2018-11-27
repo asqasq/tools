@@ -5,38 +5,6 @@ rm -rf apache-crail-1.1-incubating
 rm -rf apache-crail-1.1-incubating-src
 
 
-sha512sum -c apache-crail-1.1-incubating-bin.tar.gz.sha512
-if [ $? -ne 0 ]; then
-  echo "ERROR: CHECKSUM for apache-crail-1.1-incubating-bin.tar.gz WRONG";
-  exit 1;
-fi
-
-sha512sum -c apache-crail-1.1-incubating-src.tar.gz.sha512
-
-if [ $? -ne 0 ]; then
-  echo "ERROR: CHECKSUM for apache-crail-1.1-incubating-src.tar.gz WRONG";
-  exit 2;
-fi
-
-gpg --verify apache-crail-1.1-incubating-bin.tar.gz.asc apache-crail-1.1-incubating-bin.tar.gz
-
-if [ $? -ne 0 ]; then
-  echo "ERROR: SIGNATURE for apache-crail-1.1-incubating-bin.tar.gz WRONG";
-  exit 3;
-fi
-
-gpg --verify apache-crail-1.1-incubating-src.tar.gz.asc apache-crail-1.1-incubating-src.tar.gz
-
-if [ $? -ne 0 ]; then
-  echo "ERROR: SIGNATURE for apache-crail-1.1-incubating-src.tar.gz WRONG";
-  exit 4;
-fi
-
-echo ""
-echo ""
-echo "Checksums and signatures are all valid"
-echo ""
-echo ""
 
 
 
@@ -141,43 +109,126 @@ echo "Executing source release (namenode, datanode, client) PASSED"
 echo ""
 echo ""
 
+# Check signatures and checksums
+sha512sum -c apache-crail-1.1-incubating-bin.tar.gz.sha512
+if [ $? -ne 0 ]; then
+  echo "ERROR: CHECKSUM for apache-crail-1.1-incubating-bin.tar.gz WRONG";
+  exit 1;
+fi
+
+sha512sum -c apache-crail-1.1-incubating-src.tar.gz.sha512
+
+if [ $? -ne 0 ]; then
+  echo "ERROR: CHECKSUM for apache-crail-1.1-incubating-src.tar.gz WRONG";
+  exit 2;
+fi
+
+gpg --verify apache-crail-1.1-incubating-bin.tar.gz.asc apache-crail-1.1-incubating-bin.tar.gz
+
+if [ $? -ne 0 ]; then
+  echo "ERROR: SIGNATURE for apache-crail-1.1-incubating-bin.tar.gz WRONG";
+  exit 3;
+fi
+
+gpg --verify apache-crail-1.1-incubating-src.tar.gz.asc apache-crail-1.1-incubating-src.tar.gz
+
+if [ $? -ne 0 ]; then
+  echo "ERROR: SIGNATURE for apache-crail-1.1-incubating-src.tar.gz WRONG";
+  exit 4;
+fi
+
+echo ""
+echo ""
+echo "Checksums and signatures are all valid"
+echo ""
+echo ""
+
+
 #Check tarball for licenses, ...
-ls -l apache-crail-1.1-incubating/LICENSE
+ls -l apache-crail-1.1-incubating/LICENSE > /dev/null
 
 if [ $? -ne 0 ]; then
-  echo "ERROR: MISSING LICENSE file";
+  echo "ERROR: MISSING LICENSE file in binary release";
   exit 11;
 fi
-ls -l apache-crail-1.1-incubating/licenses
+ls -l apache-crail-1.1-incubating/licenses > /dev/null
 
 if [ $? -ne 0 ]; then
-  echo "ERROR: MISSING licenses directory";
+  echo "ERROR: MISSING licenses directory in binary release";
   exit 11;
 fi
 
 
-lcerr=0;
+lcerrbin=0;
 for f in `ls apache-crail-1.1-incubating/jars/*.jar`; do
   b=`basename $f`;
   j=`echo "$b"|grep -v '^crail*'`;
   if [ ! -z  $j  ]; then
     grep "$j" apache-crail-1.1-incubating/LICENSE > /dev/null;
     if [ $? -ne 0 ]; then
-      echo "Missing license for $j";
-      lcerr=1;
+      echo "Missing license for $j in binary release";
+      lcerrbin=1;
     fi
   fi
 done
 
-if [ $lcerr -ne 0 ]; then
-  echo "WARNING: MISSING LICENSES";
-  exit 10;
+if [ $lcerrbin -ne 0 ]; then
+  echo "WARNING: MISSING LICENSES in binary release";
+#  exit 10;
 fi
+
+
+ls -l apache-crail-1.1-incubating-src/LICENSE > /dev/null
+
+if [ $? -ne 0 ]; then
+  echo "ERROR: MISSING LICENSE file in source release";
+  exit 11;
+fi
+ls -l apache-crail-1.1-incubating-src/licenses > /dev/null
+
+if [ $? -ne 0 ]; then
+  echo "ERROR: MISSING licenses directory in source release";
+  exit 11;
+fi
+
+lcerrsrc=0;
+for f in `ls apache-crail-1.1-incubating-src/assembly/target/apache-crail-1.1-incubating-bin/apache-crail-1.1-incubating/jars/*.jar`; do
+  b=`basename $f`;
+  j=`echo "$b"|grep -v '^crail*'`;
+  if [ ! -z  $j  ]; then
+    grep "$j" apache-crail-1.1-incubating-src/LICENSE-binary > /dev/null;
+    if [ $? -ne 0 ]; then
+      echo "Missing license for $j in source release";
+      lcerrsrc=1;
+    fi
+  fi
+done
+
+
+
+
+
 
 rm -rf apache-crail-1.1-incubating
 rm -rf apache-crail-1.1-incubating-src
 rm -rf /tmp/crail/data
 rm -rf /tmp/crail/cache
+
+
+if [ $lcerrbin -ne 0 ]; then
+  echo "WARNING: MISSING LICENSES in binary release";
+#  exit 10;
+fi
+
+if [ $lcerrsrc -ne 0 ]; then
+  echo "WARNING: MISSING LICENSES in source release";
+#  exit 10;
+fi
+
+if [ $lcerrsrc -ne 0 -o $lcerrbin -ne 0 ]; then
+  exit 10;
+fi
+
 
 echo ""
 echo ""
