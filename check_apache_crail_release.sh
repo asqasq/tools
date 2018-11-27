@@ -1,5 +1,10 @@
 #!/bin/bash
 
+# Make sure to start with a clean tree
+rm -rf apache-crail-1.1-incubating
+rm -rf apache-crail-1.1-incubating-src
+
+
 sha512sum -c apache-crail-1.1-incubating-bin.tar.gz.sha512
 if [ $? -ne 0 ]; then
   echo "ERROR: CHECKSUM for apache-crail-1.1-incubating-bin.tar.gz WRONG";
@@ -33,9 +38,29 @@ echo "Checksums and signatures are all valid"
 echo ""
 echo ""
 
-rm -rf apache-crail-1.1-incubating
+
 
 tar xvzf apache-crail-1.1-incubating-bin.tar.gz
+#First check tarball for licenses, ...
+lcerr=0;
+for f in `ls apache-crail-1.1-incubating/jars/*.jar`; do
+  b=`basename $f`;
+  j=`echo "$b"|grep -v '^crail*'`;
+  if [ ! -z  $j  ]; then
+    grep "$j" apache-crail-1.1-incubating/LICENSE > /dev/null;
+    if [ $? -ne 0 ]; then
+      echo "Missing license for $j";
+      lcerr=1;
+    fi
+  fi
+done
+
+if [ $lcerr -ne 0 ]; then
+  echo "WARNING: MISSING LICENSES";
+  exit 10;
+fi
+
+
 mkdir -p /tmp/crail/data
 mkdir -p /tmp/crail/cache
 
