@@ -90,4 +90,57 @@ if [ $? -ne 0 ]; then
   exit 6;
 fi
 
+rm -rf /tmp/crail/data/*
+rm -rf /tmp/crail/cache/*
 
+
+echo "crail.namenode.address            crail://localhost:9060" > apache-crail-1.1-incubating-src/assembly/target/apache-crail-1.1-incubating-bin/apache-crail-1.1-incubating/conf/crail-site.conf
+echo "crail.cachepath                   /tmp/crail/cache" >> apache-crail-1.1-incubating-src/assembly/target/apache-crail-1.1-incubating-bin/apache-crail-1.1-incubating/conf/crail-site.conf
+echo "crail.cachelimit                  0" >> apache-crail-1.1-incubating-src/assembly/target/apache-crail-1.1-incubating-bin/apache-crail-1.1-incubating/conf/crail-site.conf
+echo "crail.storage.tcp.interface       ${netiface}" >> apache-crail-1.1-incubating-src/assembly/target/apache-crail-1.1-incubating-bin/apache-crail-1.1-incubating/conf/crail-site.conf
+echo "crail.storage.tcp.datapath        /tmp/crail/data" >> apache-crail-1.1-incubating-src/assembly/target/apache-crail-1.1-incubating-bin/apache-crail-1.1-incubating/conf/crail-site.conf
+echo "crail.storage.tcp.storagelimit    1073741824" >> apache-crail-1.1-incubating-src/assembly/target/apache-crail-1.1-incubating-bin/apache-crail-1.1-incubating/conf/crail-site.conf
+
+cp apache-crail-1.1-incubating-src/assembly/target/apache-crail-1.1-incubating-bin/apache-crail-1.1-incubating/conf/core-site.xml.template \
+   apache-crail-1.1-incubating-src/assembly/target/apache-crail-1.1-incubating-bin/apache-crail-1.1-incubating/conf/core-site.xml
+
+
+
+(cd apache-crail-1.1-incubating-src/assembly/target/apache-crail-1.1-incubating-bin/apache-crail-1.1-incubating && CRAIL_HOME=`pwd` ./bin/crail namenode & )
+sleep 5;
+
+(cd apache-crail-1.1-incubating-src/assembly/target/apache-crail-1.1-incubating-bin/apache-crail-1.1-incubating && CRAIL_HOME=`pwd` ./bin/crail datanode & )
+sleep 5;
+
+
+(cd apache-crail-1.1-incubating-src/assembly/target/apache-crail-1.1-incubating-bin/apache-crail-1.1-incubating && CRAIL_HOME=`pwd` ./bin/crail fs -touchz /testfile.txt  )
+(cd apache-crail-1.1-incubating-src/assembly/target/apache-crail-1.1-incubating-bin/apache-crail-1.1-incubating && CRAIL_HOME=`pwd` ./bin/crail fs -ls / | grep testfile.txt )
+
+if [ $? -ne 0 ]; then
+  echo "ERROR: Cannot correctly execute source release";
+  exit 6;
+fi
+
+
+sleep 10;
+kill `ps xa|grep Dproc_namenode|awk '{print $1}'`
+kill `ps xa|grep Dproc_datanode|awk '{print $1}'`
+
+
+
+rm -rf apache-crail-1.1-incubating-src
+
+echo ""
+echo ""
+echo "Executing source release (namenode, datanode, client) PASSED"
+echo ""
+echo ""
+
+rm -rf /tmp/crail/data
+rm -rf /tmp/crail/cache
+
+echo ""
+echo ""
+echo "ALL TESTS PASSED"
+echo ""
+echo ""
