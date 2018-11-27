@@ -39,10 +39,13 @@ tar xvzf apache-crail-1.1-incubating-bin.tar.gz
 mkdir -p /tmp/crail/data
 mkdir -p /tmp/crail/cache
 
+netiface=`ip -4 -o  address|grep -v 127.0|grep inet|head -1|awk '{print $2}'`
+
+
 echo "crail.namenode.address            crail://localhost:9060" > apache-crail-1.1-incubating/conf/crail-site.conf
 echo "crail.cachepath                   /tmp/crail/cache" >> apache-crail-1.1-incubating/conf/crail-site.conf
 echo "crail.cachelimit                  0" >> apache-crail-1.1-incubating/conf/crail-site.conf
-echo "crail.storage.tcp.interface       enp0s31f6" >> apache-crail-1.1-incubating/conf/crail-site.conf
+echo "crail.storage.tcp.interface       ${netiface}" >> apache-crail-1.1-incubating/conf/crail-site.conf
 echo "crail.storage.tcp.datapath        /tmp/crail/data" >> apache-crail-1.1-incubating/conf/crail-site.conf
 echo "crail.storage.tcp.storagelimit    1073741824" >> apache-crail-1.1-incubating/conf/crail-site.conf
 
