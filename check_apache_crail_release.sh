@@ -41,24 +41,6 @@ echo ""
 
 
 tar xvzf apache-crail-1.1-incubating-bin.tar.gz
-#First check tarball for licenses, ...
-lcerr=0;
-for f in `ls apache-crail-1.1-incubating/jars/*.jar`; do
-  b=`basename $f`;
-  j=`echo "$b"|grep -v '^crail*'`;
-  if [ ! -z  $j  ]; then
-    grep "$j" apache-crail-1.1-incubating/LICENSE > /dev/null;
-    if [ $? -ne 0 ]; then
-      echo "Missing license for $j";
-      lcerr=1;
-    fi
-  fi
-done
-
-if [ $lcerr -ne 0 ]; then
-  echo "WARNING: MISSING LICENSES";
-  exit 10;
-fi
 
 
 mkdir -p /tmp/crail/data
@@ -98,7 +80,6 @@ kill `ps xa|grep Dproc_datanode|awk '{print $1}'`
 
 
 
-rm -rf apache-crail-1.1-incubating
 
 echo ""
 echo ""
@@ -153,7 +134,6 @@ kill `ps xa|grep Dproc_datanode|awk '{print $1}'`
 
 
 
-rm -rf apache-crail-1.1-incubating-src
 
 echo ""
 echo ""
@@ -161,6 +141,41 @@ echo "Executing source release (namenode, datanode, client) PASSED"
 echo ""
 echo ""
 
+#Check tarball for licenses, ...
+ls -l apache-crail-1.1-incubating/LICENSE
+
+if [ $? -ne 0 ]; then
+  echo "ERROR: MISSING LICENSE file";
+  exit 11;
+fi
+ls -l apache-crail-1.1-incubating/licenses
+
+if [ $? -ne 0 ]; then
+  echo "ERROR: MISSING licenses directory";
+  exit 11;
+fi
+
+
+lcerr=0;
+for f in `ls apache-crail-1.1-incubating/jars/*.jar`; do
+  b=`basename $f`;
+  j=`echo "$b"|grep -v '^crail*'`;
+  if [ ! -z  $j  ]; then
+    grep "$j" apache-crail-1.1-incubating/LICENSE > /dev/null;
+    if [ $? -ne 0 ]; then
+      echo "Missing license for $j";
+      lcerr=1;
+    fi
+  fi
+done
+
+if [ $lcerr -ne 0 ]; then
+  echo "WARNING: MISSING LICENSES";
+  exit 10;
+fi
+
+rm -rf apache-crail-1.1-incubating
+rm -rf apache-crail-1.1-incubating-src
 rm -rf /tmp/crail/data
 rm -rf /tmp/crail/cache
 
