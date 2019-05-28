@@ -10,7 +10,7 @@ netiface=`ip -4 -o  address|grep -v 127.0|grep inet|head -1|awk '{print $2}'`
 echo "crail.namenode.address            crail://localhost:9060" > conf/crail-site.conf
 echo "crail.cachepath                   /tmp/crail/cache" >> crail-site.conf
 echo "crail.cachelimit                  0" >> conf/crail-site.conf
-echo "crail.storage.tcp.interface       ${netiface}" >> aconf/crail-site.conf
+echo "crail.storage.tcp.interface       ${netiface}" >> conf/crail-site.conf
 echo "crail.storage.tcp.datapath        /tmp/crail/data" >> conf/crail-site.conf
 echo "crail.storage.tcp.storagelimit    1073741824" >> conf/crail-site.conf
 
