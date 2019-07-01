@@ -110,7 +110,7 @@ mv /incubator-crail/assembly/target/apache-crail-${v}-bin/apache-crail-${v} /cra
 mkdir -p /tmp/crail/data
 mkdir -p /tmp/crail/cache
 
-netiface=`ip -4 -o  address|grep -v 127.0|grep inet|head -1|awk '{print $2}'`
+netiface="eth0"
 
 
 echo "crail.namenode.address            crail://localhost:9060" > $CRAIL_HOME/conf/crail-site.conf
