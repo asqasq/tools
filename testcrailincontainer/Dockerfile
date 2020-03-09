@@ -21,7 +21,9 @@ RUN echo "Install openjdk8, git and envsubst" && \
     openjdk-8-jdk-headless \
     git \
     gettext-base \
-    libxml2-utils
+    libxml2-utils \
+    build-essential \
+    dh-autoreconf
 ENV JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
 ENV PATH=${PATH}:${JAVA_HOME}/bin
 

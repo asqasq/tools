@@ -106,35 +106,34 @@ mv /incubator-crail/assembly/target/apache-crail-${v}-bin/apache-crail-${v} /cra
 
 
 
-$crailname=$CRAIL_HOME
 
 mkdir -p /tmp/crail/data
 mkdir -p /tmp/crail/cache
 
-netiface=`ip -4 -o  address|grep -v 127.0|grep inet|head -1|awk '{print $2}'`
+netiface="eth0"
 
 
-echo "crail.namenode.address            crail://localhost:9060" > $crailname/conf/crail-site.conf
-echo "crail.cachepath                   /tmp/crail/cache" >> $crailname/conf/crail-site.conf
-echo "crail.cachelimit                  0" >> $crailname/conf/crail-site.conf
-echo "crail.storage.tcp.interface       ${netiface}" >> $crailname/conf/crail-site.conf
-echo "crail.storage.tcp.datapath        /tmp/crail/data" >> $crailname/conf/crail-site.conf
-echo "crail.storage.tcp.storagelimit    1073741824" >> $crailname/conf/crail-site.conf
+echo "crail.namenode.address            crail://localhost:9060" > $CRAIL_HOME/conf/crail-site.conf
+echo "crail.cachepath                   /tmp/crail/cache" >> $CRAIL_HOME/conf/crail-site.conf
+echo "crail.cachelimit                  0" >> $CRAIL_HOME/conf/crail-site.conf
+echo "crail.storage.tcp.interface       ${netiface}" >> $CRAIL_HOME/conf/crail-site.conf
+echo "crail.storage.tcp.datapath        /tmp/crail/data" >> $CRAIL_HOME/conf/crail-site.conf
+echo "crail.storage.tcp.storagelimit    1073741824" >> $CRAIL_HOME/conf/crail-site.conf
 
-cat $crailname/conf/crail-site.conf
+cat $CRAIL_HOME/conf/crail-site.conf
 
 
-cp $crailname/conf/core-site.xml.template $crailname/conf/core-site.xml
+cp $CRAIL_HOME/conf/core-site.xml.template $CRAIL_HOME/conf/core-site.xml
 
-(cd $crailname && CRAIL_HOME=`pwd` ./bin/crail namenode & )
+(cd $CRAIL_HOME && CRAIL_HOME=`pwd` ./bin/crail namenode & )
 sleep 5;
 
-(cd $crailname && CRAIL_HOME=`pwd` ./bin/crail datanode & )
+(cd $CRAIL_HOME && CRAIL_HOME=`pwd` ./bin/crail datanode & )
 sleep 5;
 
 
-(cd $crailname && CRAIL_HOME=`pwd` ./bin/crail fs -touchz /testfile.txt  )
-(cd $crailname && CRAIL_HOME=`pwd` ./bin/crail fs -ls / | grep testfile.txt )
+(cd $CRAIL_HOME && ./bin/crail fs -touchz /testfile.txt  )
+(cd $CRAIL_HOME && ./bin/crail fs -ls / | grep testfile.txt )
 
 if [ $? -ne 0 ]; then
   echo "ERROR: Cannot correctly execute Crail";
